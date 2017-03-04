@@ -1,0 +1,94 @@
+package firebase.app.com.samplefirebaseapp;
+
+import android.text.Editable;
+
+/**
+ * Created by krishna on 2/3/2017.
+ */
+
+public class users {
+    private String OrderId;
+    private String CustomerName;
+    private String ValidationCode;
+    private String Customerkey;
+    private String status;
+
+    public users() {
+
+    }
+
+
+    public users(String CustomerName, String OrderId, String ValidationCode) {
+        this.CustomerName = CustomerName;
+        this.OrderId = OrderId;
+        this.ValidationCode = ValidationCode;
+
+    }
+
+    public users(String CustomerKey, String status, String CustomerName, String OrderId, String ValidationCode) {
+        this.CustomerName = CustomerName;
+        this.OrderId = OrderId;
+        this.ValidationCode = ValidationCode;
+        this.Customerkey = CustomerKey;
+        this.status = status;
+
+    }
+
+    public String getCustomerkey() {
+        return Customerkey;
+    }
+
+
+    public String getCustomerName() {
+
+        return CustomerName;
+    }
+
+    public String getOrderId() {
+        return OrderId;
+    }
+
+    public String getValidationCode() {
+        return ValidationCode;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setOrderId(String orderId) {
+        OrderId = orderId;
+    }
+
+    public void setCustomerName(String customerName) {
+        CustomerName = customerName;
+    }
+
+    public void setValidationCode(String validationCode) {
+        ValidationCode = validationCode;
+    }
+
+    public void setCustomerkey(String Customerkey) {
+        this.Customerkey = Customerkey;
+    }
+}
+
+   /* public void setValues(users newusers) {
+        OrderId=newusers.getOrderId();
+        CustomerName=newusers.getCustomerName();
+        ValidationCode=newusers.getValidationCode();
+    }*/
+
+    /*  public String getUserCode() {
+        return UserCode;
+    }
+
+    public void setUserCode(String usercode) {
+        UserCode = usercode;
+    }
+
+    public users(String usercode)
+    {
+        UserCode = usercode;
+
+    }*/
