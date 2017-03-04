@@ -1,0 +1,163 @@
+package firebase.app.com.samplefirebaseapp;
+
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Created by krishna on 2/7/2017.
+ */
+
+public class ListRetriveClass extends AppCompatActivity {
+    private ListView list_view;
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseUser mFirebaseUser;
+    private DatabaseReference mDatabase;
+    users customer1;
+    String mUserId;
+    private ProgressDialog mProgressDialog;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.list_retrive_layout);
+        Firebase.setAndroidContext(this);
+        mFirebaseAuth = FirebaseAuth.getInstance();
+
+
+
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        if (mFirebaseUser == null) {
+            loadLogin();
+        } else {
+            mUserId = mFirebaseUser.getUid();
+            list_view = (ListView) findViewById(R.id.list_view);
+            Firebase ref = new Firebase("https://samplefirebaseapp-aa839.firebaseio.com/users/" + mUserId + "/customer");
+            final List<users> information = new LinkedList<>();
+            final ArrayAdapter<users> adapter = new ArrayAdapter<users>(this, R.layout.demo_layout, information) {
+
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View listItemView = convertView;
+                    if(listItemView == null) {
+                        listItemView = LayoutInflater.from(getContext()).inflate(
+                                R.layout.demo_layout, parent, false);
+                    }
+                    users customer3 = getItem(position);
+                    ((TextView) listItemView.findViewById(R.id.my_text1)).setText("OrderId: " + customer3.getOrderId());
+                    ((TextView) listItemView.findViewById(R.id.my_text2)).setText("CustomerName: " + customer3.getCustomerName());
+                    ((TextView) listItemView.findViewById(R.id.my_text3)).setText("VaidationCode: "+ customer3.getValidationCode());
+                    ((TextView)listItemView.findViewById(R.id.my_text4)).setText("status: "+ customer3.getStatus());
+                    ((TextView) listItemView.findViewById(R.id.my_text5)).setText("customer:"+ customer3.getCustomerkey());
+                    return listItemView;
+
+                }
+
+            };
+
+            ref.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    customer1 = dataSnapshot.getValue(users.class);
+                    information.add(customer1);
+
+                    adapter.notifyDataSetChanged();
+
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    customer1 = dataSnapshot.getValue(users.class);
+                    String customerKey = dataSnapshot.getKey();
+                }
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    String commentKey = dataSnapshot.getKey();}
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    customer1 = dataSnapshot.getValue(users.class);
+                    String commentKey = dataSnapshot.getKey();
+                }
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                }
+
+            });
+            list_view.setAdapter(adapter);
+            list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, final int position, long id) {
+                    users customer2 = information.get(position);
+                    final String custkey=customer2.getCustomerkey();
+
+                    Toast.makeText(ListRetriveClass.this, "Updated Successfully"+custkey, Toast.LENGTH_SHORT).show();
+
+
+
+                    Firebase ref = new Firebase("https://samplefirebaseapp-aa839.firebaseio.com/users/" + mUserId + "/customer");
+                    Firebase myRef =ref.push();
+                    final String prodKey =myRef.getKey();
+
+                    Query updateQuery = mDatabase.child(prodKey);
+                    updateQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
+                            String pierce =dataSnapshot.getKey();
+
+                            mDatabase.child("users").child(mUserId).child("customer").child(custkey).child("status").setValue("verified");
+                            adapter.notifyDataSetChanged();
+                            Toast.makeText(ListRetriveClass.this, "Updated Successfully"+pierce, Toast.LENGTH_SHORT).show();
+                            list_view.refreshDrawableState();
+                        }
+
+
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                        }
+                    });
+                }
+            });
+        }
+    }
+    private void loadLogin() {
+
+        Intent i=new Intent(ListRetriveClass.this,LoginActivity.class);
+        startActivity(i);
+    }
+}
+
+
+
